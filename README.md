@@ -2,9 +2,21 @@
   <img src="https://raw.githubusercontent.com/openmind-systems-lab/.github/main/profile/logo.png" width="350">
 </p>
 
-# 🚀 Kyverno Playground
+<h1 align="center">Kyverno Playground</h1>
 
-An Open Source Proof of Concept demonstrating Kubernetes policy enforcement using **Kyverno**.
+<p align="center">
+An Open Source Proof of Concept demonstrating Kubernetes policy enforcement with Kyverno.
+</p>
+
+<p align="center">
+
+![License](https://img.shields.io/badge/license-MIT-blue)
+![Open Source](https://img.shields.io/badge/Open%20Source-Yes-brightgreen)
+![Proof of Concept](https://img.shields.io/badge/Type-Proof%20of%20Concept-orange)
+![Kubernetes](https://img.shields.io/badge/Kubernetes-Policy%20Engine-blue)
+![Association](https://img.shields.io/badge/OpenMind%20Systems%20Lab-Loi%201901-blue)
+
+</p>
 
 ---
 
@@ -147,7 +159,18 @@ Expected output:
 NAME          READY   STATUS
 good-nginx    1/1     Running
 ```
+---
 
+# 📚 What You Will Learn
+
+After completing this Proof of Concept, you will understand how to:
+
+- Deploy Kyverno using Helm
+- Create Kubernetes ClusterPolicies
+- Enforce security policies with Admission Controllers
+- Prevent insecure container image deployments
+- Validate Kubernetes resources before admission
+- Apply Kubernetes governance best practices
 ---
 
 # 🧹 Cleanup
