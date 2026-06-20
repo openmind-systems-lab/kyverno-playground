@@ -1,49 +1,25 @@
-# 🚀 Kyverno Proof of Concept (PoC)
+<p align="center">
+  <img src="https://raw.githubusercontent.com/openmind-systems-lab/.github/main/profile/logo.png" width="350">
+</p>
+
+# 🚀 Kyverno Playground
+
+An Open Source Proof of Concept demonstrating Kubernetes policy enforcement using **Kyverno**.
+
+---
 
 ## 📖 Overview
 
-This Proof of Concept demonstrates how **Kyverno** acts as a Kubernetes **Admission Controller** to enforce security and governance policies before workloads are created in a cluster.
+This Proof of Concept demonstrates how **Kyverno** acts as a Kubernetes Admission Controller to enforce security and governance policies before workloads are created in a cluster.
 
-In this example, we'll create a policy that **prevents Pods from using the `latest` container image tag**.
+In this example, a **ClusterPolicy** prevents Pods from using the `latest` container image tag.
 
 ---
 
 # 🏗️ Architecture
+
 ![schema](img/schema.png)
 
-
----
-
-# 🧠 How Kyverno Works
-
-Kyverno integrates with Kubernetes using **Admission Webhooks**.
-
-Whenever a user creates or modifies a Kubernetes resource, the request flows through Kyverno before Kubernetes accepts it.
-
-The workflow looks like this:
-
-```text
-kubectl apply
-      │
-      ▼
-Kubernetes API Server
-      │
-      ▼
-Admission Webhook
-      │
-      ▼
-Kyverno evaluates policies
-      │
-      ├──────────────┐
-      │              │
-      ▼              ▼
-Allowed ✅       Denied ❌
-      │              │
-      ▼              ▼
-Object Created   Error returned
-```
-
-Kyverno acts as a **security gate** for your cluster.
 
 ---
 
@@ -75,64 +51,24 @@ nginx:latest
 
 # 📦 Install Kyverno
 
+Add the Helm repository:
+
 ```bash
 helm repo add kyverno https://kyverno.github.io/kyverno/
 helm repo update
+```
 
+Install Kyverno:
+
+```bash
 helm install kyverno kyverno/kyverno \
   -n kyverno \
   --create-namespace
 ```
 
-Verify:
-
-```bash
-kubectl get pods -n kyverno
-```
-
-Expected:
-
-```text
-NAME                                      READY   STATUS
-kyverno-admission-controller              1/1     Running
-kyverno-background-controller             1/1     Running
-kyverno-cleanup-controller                1/1     Running
-kyverno-reports-controller                1/1     Running
-```
-
 ---
 
-# 🔒 Create the Policy
-
-Create a file named **disallow-latest.yaml**
-
-```yaml
-apiVersion: kyverno.io/v1
-kind: ClusterPolicy
-metadata:
-  name: disallow-latest-tag
-
-spec:
-  validationFailureAction: Enforce
-  background: true
-
-  rules:
-    - name: require-explicit-image-tag
-
-      match:
-        any:
-          - resources:
-              kinds:
-                - Pod
-
-      validate:
-        message: "Images using the 'latest' tag are not allowed."
-
-        pattern:
-          spec:
-            containers:
-              - image: "!*:latest"
-```
+# 🔒 Deploy the Policy
 
 Apply the policy:
 
@@ -142,13 +78,48 @@ kubectl apply -f disallow-latest.yaml
 
 ---
 
-# ❌ Test a Failing Deployment
+# 🔍 Verification
+
+Verify that Kyverno is running:
+
+```bash
+kubectl get pods -n kyverno
+```
+
+Expected output:
+
+```text
+NAME                                      READY   STATUS
+kyverno-admission-controller              1/1     Running
+kyverno-background-controller             1/1     Running
+kyverno-cleanup-controller                1/1     Running
+kyverno-reports-controller                1/1     Running
+```
+
+Verify that the policy has been created:
+
+```bash
+kubectl get clusterpolicy
+```
+
+Expected output:
+
+```text
+NAME                   ADMISSION   BACKGROUND
+disallow-latest-tag    true        true
+```
+
+---
+
+# 🧪 Testing
+
+Deploy a Pod using the `latest` tag:
 
 ```bash
 kubectl run bad-nginx --image=nginx:latest
 ```
 
-Expected output:
+Expected result:
 
 ```text
 Error from server:
@@ -158,9 +129,7 @@ admission webhook denied the request:
 Images using the 'latest' tag are not allowed.
 ```
 
----
-
-# ✅ Test a Successful Deployment
+Deploy a Pod using a fixed image version:
 
 ```bash
 kubectl run good-nginx --image=nginx:1.27
@@ -172,76 +141,12 @@ Verify:
 kubectl get pods
 ```
 
-Expected:
+Expected output:
 
 ```text
 NAME          READY   STATUS
 good-nginx    1/1     Running
 ```
-
----
-
-# 🏛️ Kyverno Components
-
-```text
-+--------------------------------------------------+
-| Admission Controller                             |
-|--------------------------------------------------|
-| Validates and mutates incoming requests          |
-+--------------------------------------------------+
-
-+--------------------------------------------------+
-| Background Controller                            |
-|--------------------------------------------------|
-| Periodically scans existing resources            |
-+--------------------------------------------------+
-
-+--------------------------------------------------+
-| Reports Controller                               |
-|--------------------------------------------------|
-| Generates PolicyReport and ClusterPolicyReport   |
-+--------------------------------------------------+
-
-+--------------------------------------------------+
-| Cleanup Controller                               |
-|--------------------------------------------------|
-| Removes expired resources                        |
-+--------------------------------------------------+
-```
-
----
-
-# 🌟 Why Kyverno?
-
-✅ Kubernetes Native
-
-✅ Policies written in YAML
-
-✅ No Rego language required
-
-✅ Easy to learn
-
-✅ GitOps Friendly
-
-✅ Admission Control
-
-✅ Policy Auditing
-
-✅ Resource Mutation
-
-✅ Resource Generation
-
-✅ Image Signature Verification
-
----
-
-# 🎉 Conclusion
-
-Kyverno provides a simple yet powerful way to enforce security, compliance, and operational best practices in Kubernetes.
-
-Instead of writing custom admission webhooks or learning Rego, platform teams can define policies using familiar Kubernetes YAML manifests.
-
-This PoC demonstrated how Kyverno prevents workloads using the `latest` image tag from entering the cluster, ensuring better deployment hygiene and repeatable governance.
 
 ---
 
@@ -280,4 +185,18 @@ kubectl delete namespace kyverno
 
 ---
 
-⭐ Happy Policy Engineering! 🚀
+# 🏛 About OpenMind Systems Lab
+
+OpenMind Systems Lab is an independent French non-profit association dedicated to research, experimental development and technical benchmarking in Cloud Native technologies.
+
+Our mission is to produce practical, reproducible and educational Open Source Proofs of Concept covering Kubernetes, Platform Engineering, Distributed Messaging, Infrastructure Security and Artificial Intelligence.
+
+GitHub Organization:
+
+https://github.com/openmind-systems-lab
+
+---
+
+<p align="center">
+Made with ❤️ by OpenMind Systems Lab
+</p>
